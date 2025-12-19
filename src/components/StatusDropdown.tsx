@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 
-type Status = "planning" | "bought" | "shipped" | "wrapped" | "delayed";
+type Status = "idea" | "planned" | "bought" | "shipped" | "wrapped" | "delayed";
 
-const statusConfig: Record<Status, { label: string; bg: string; text: string }> = {
-  planning: { label: "Planning", bg: "bg-gray-100", text: "text-gray-700" },
-  bought: { label: "Bought", bg: "bg-holly/10", text: "text-holly" },
-  shipped: { label: "Shipped", bg: "bg-blue-100", text: "text-blue-700" },
-  wrapped: { label: "Wrapped", bg: "bg-gold/20", text: "text-amber-700" },
-  delayed: { label: "Delayed", bg: "bg-cranberry/10", text: "text-cranberry" },
+const statusConfig: Record<Status, { label: string; bg: string; text: string; icon: string }> = {
+  idea: { label: "💭 Idea", bg: "bg-purple-100", text: "text-purple-700", icon: "💭" },
+  planned: { label: "📋 Planned", bg: "bg-amber-100", text: "text-amber-700", icon: "📋" },
+  bought: { label: "💰 Bought", bg: "bg-holly/10", text: "text-holly", icon: "💰" },
+  shipped: { label: "📦 Shipped", bg: "bg-blue-100", text: "text-blue-700", icon: "📦" },
+  wrapped: { label: "🎁 Wrapped", bg: "bg-cranberry/10", text: "text-cranberry", icon: "🎁" },
+  delayed: { label: "⏳ Delayed", bg: "bg-gray-100", text: "text-gray-600", icon: "⏳" },
 };
 
 interface StatusDropdownProps {
@@ -55,30 +56,71 @@ export function StatusDropdown({ status, onChange }: StatusDropdownProps) {
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
             
-            <div className="pb-8 lg:pb-0 lg:py-1">
-              {(Object.keys(statusConfig) as Status[]).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    onChange(s);
-                    setOpen(false);
-                  }}
-                  className={`w-full min-h-[52px] lg:min-h-[44px] px-5 lg:px-3 text-left text-base lg:text-sm text-coal lg:text-white hover:bg-gray-100 lg:hover:bg-white/10 active:bg-gray-200 lg:active:bg-white/20 flex items-center gap-3 ${
-                    s === status ? "bg-gray-50 lg:bg-white/10" : ""
-                  }`}
-                >
-                  {s === status && (
-                    <svg className="w-5 h-5 text-holly lg:text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                  <span className={s !== status ? "ml-8 lg:ml-0" : ""}>{statusConfig[s].label}</span>
-                </button>
+            {/* Section: Ideas */}
+            <div className="pb-2 lg:pb-0">
+              <div className="px-5 lg:px-3 py-2 text-xs text-silver lg:text-gray-400 uppercase tracking-wide font-semibold">
+                Brainstorming
+              </div>
+              {(["idea"] as Status[]).map((s) => (
+                <StatusOption key={s} status={s} currentStatus={status} onChange={onChange} onClose={() => setOpen(false)} />
+              ))}
+            </div>
+
+            {/* Section: Committed */}
+            <div className="border-t border-frost lg:border-white/10 pb-2 lg:pb-0">
+              <div className="px-5 lg:px-3 py-2 text-xs text-silver lg:text-gray-400 uppercase tracking-wide font-semibold">
+                Committed
+              </div>
+              {(["planned"] as Status[]).map((s) => (
+                <StatusOption key={s} status={s} currentStatus={status} onChange={onChange} onClose={() => setOpen(false)} />
+              ))}
+            </div>
+
+            {/* Section: Purchased */}
+            <div className="border-t border-frost lg:border-white/10 pb-8 lg:pb-1">
+              <div className="px-5 lg:px-3 py-2 text-xs text-silver lg:text-gray-400 uppercase tracking-wide font-semibold">
+                Purchased
+              </div>
+              {(["bought", "shipped", "wrapped", "delayed"] as Status[]).map((s) => (
+                <StatusOption key={s} status={s} currentStatus={status} onChange={onChange} onClose={() => setOpen(false)} />
               ))}
             </div>
           </div>
         </>
       )}
     </div>
+  );
+}
+
+function StatusOption({ 
+  status, 
+  currentStatus, 
+  onChange, 
+  onClose 
+}: { 
+  status: Status; 
+  currentStatus: Status; 
+  onChange: (s: Status) => void; 
+  onClose: () => void;
+}) {
+  const isSelected = status === currentStatus;
+  
+  return (
+    <button
+      onClick={() => {
+        onChange(status);
+        onClose();
+      }}
+      className={`w-full min-h-[52px] lg:min-h-[44px] px-5 lg:px-3 text-left text-base lg:text-sm text-coal lg:text-white hover:bg-gray-100 lg:hover:bg-white/10 active:bg-gray-200 lg:active:bg-white/20 flex items-center gap-3 ${
+        isSelected ? "bg-gray-50 lg:bg-white/10" : ""
+      }`}
+    >
+      {isSelected && (
+        <svg className="w-5 h-5 text-holly lg:text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      )}
+      <span className={!isSelected ? "ml-8 lg:ml-0" : ""}>{statusConfig[status].label}</span>
+    </button>
   );
 }

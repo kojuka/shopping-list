@@ -4,12 +4,13 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { StatusDropdown } from "./StatusDropdown";
 
-type Status = "planning" | "bought" | "shipped" | "wrapped" | "delayed";
+type Status = "idea" | "planned" | "bought" | "shipped" | "wrapped" | "delayed";
 
 interface Recipient {
   _id: Id<"recipients">;
   name: string;
   budget: number;
+  committed: number;
   spent: number;
 }
 
@@ -29,14 +30,14 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetValue, setBudgetValue] = useState(recipient.budget.toString());
 
-  const remaining = recipient.budget - recipient.spent;
+  const available = recipient.budget - recipient.committed - recipient.spent;
 
   const handleAddItem = async () => {
     await createItem({
       recipientId: recipient._id,
       name: "New Item",
       cost: 0,
-      status: "planning",
+      status: "idea",
       notes: "",
     });
   };
@@ -118,19 +119,28 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0">
             <h3 className="font-semibold text-coal truncate">{recipient.name}'s List</h3>
-            <p className="text-sm text-silver">
-              Remaining:{" "}
-              <span className={remaining >= 0 ? "text-holly font-semibold" : "text-cranberry font-semibold"}>
-                ${remaining.toFixed(0)}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              {recipient.committed > 0 && (
+                <span className="text-amber-600">
+                  ${recipient.committed.toFixed(0)} planned
+                </span>
+              )}
+              {recipient.spent > 0 && (
+                <span className="text-holly">
+                  ${recipient.spent.toFixed(0)} spent
+                </span>
+              )}
+              <span className={available >= 0 ? "text-silver" : "text-cranberry font-semibold"}>
+                ${available.toFixed(0)} left
               </span>
-            </p>
+            </div>
           </div>
           <button
             onClick={handleAddItem}
             className="min-h-[44px] px-4 sm:px-5 bg-cranberry hover:bg-cranberry-dark active:bg-cranberry-dark text-white rounded-xl font-medium transition-colors flex items-center gap-2 flex-shrink-0"
           >
             <span className="text-lg">+</span>
-            <span className="hidden sm:inline">Add Item</span>
+            <span className="hidden sm:inline">Add Idea</span>
           </button>
         </div>
       </div>
@@ -154,7 +164,7 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
             onClick={handleAddItem}
             className="px-6 py-3 bg-holly text-white rounded-xl font-medium"
           >
-            Add First Gift
+            Add First Idea
           </button>
         </div>
       )}
@@ -192,8 +202,11 @@ function GiftCard({ item, onUpdate, onDelete }: GiftCardProps) {
   const [costValue, setCostValue] = useState(item.cost.toString());
   const [notesValue, setNotesValue] = useState(item.notes);
 
+  // Ideas show cost as muted since they don't count toward budget
+  const isIdea = item.status === "idea";
+
   return (
-    <div className="p-4 sm:p-5">
+    <div className={`p-4 sm:p-5 ${isIdea ? "bg-purple-50/50" : ""}`}>
       {/* Top row: Name and Delete */}
       <div className="flex items-start justify-between gap-3 mb-3">
         {editingName ? (
@@ -261,9 +274,10 @@ function GiftCard({ item, onUpdate, onDelete }: GiftCardProps) {
         ) : (
           <button
             onClick={() => setEditingCost(true)}
-            className="min-h-[44px] px-4 border border-frost rounded-xl hover:bg-frost active:bg-frost transition-colors font-medium"
+            className={`min-h-[44px] px-4 border border-frost rounded-xl hover:bg-frost active:bg-frost transition-colors font-medium ${isIdea ? "text-silver" : ""}`}
           >
             ${item.cost.toFixed(2)}
+            {isIdea && <span className="text-xs ml-1">(est)</span>}
           </button>
         )}
         

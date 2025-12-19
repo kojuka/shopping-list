@@ -34,14 +34,15 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen pb-20 lg:pb-8">
-      <Header remaining={globalBudget.remaining} />
+      <Header remaining={globalBudget.available} />
       
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <BudgetCard
-          totalSpent={globalBudget.totalSpent}
           totalBudget={globalBudget.totalBudget}
+          totalCommitted={globalBudget.totalCommitted}
+          totalSpent={globalBudget.totalSpent}
+          available={globalBudget.available}
           percentUtilized={globalBudget.percentUtilized}
-          remaining={globalBudget.remaining}
         />
 
         <div className="mt-4 sm:mt-8 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">

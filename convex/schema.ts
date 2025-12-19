@@ -14,7 +14,8 @@ export default defineSchema({
     name: v.string(),
     cost: v.number(),
     status: v.union(
-      v.literal("planning"),
+      v.literal("idea"),
+      v.literal("planned"),
       v.literal("bought"),
       v.literal("shipped"),
       v.literal("wrapped"),

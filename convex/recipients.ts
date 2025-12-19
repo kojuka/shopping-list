@@ -6,19 +6,29 @@ export const list = query({
   handler: async (ctx) => {
     const recipients = await ctx.db.query("recipients").collect();
     
-    // Calculate spent amount for each recipient
-    const recipientsWithSpent = await Promise.all(
+    // Calculate committed and spent amounts for each recipient
+    const recipientsWithBudget = await Promise.all(
       recipients.map(async (recipient) => {
         const items = await ctx.db
           .query("items")
           .withIndex("by_recipient", (q) => q.eq("recipientId", recipient._id))
           .collect();
-        const spent = items.reduce((sum, item) => sum + item.cost, 0);
-        return { ...recipient, spent };
+        
+        // Committed = planned items (not yet bought)
+        const committed = items
+          .filter((item) => item.status === "planned")
+          .reduce((sum, item) => sum + item.cost, 0);
+        
+        // Spent = bought, shipped, wrapped items (actually purchased)
+        const spent = items
+          .filter((item) => ["bought", "shipped", "wrapped"].includes(item.status))
+          .reduce((sum, item) => sum + item.cost, 0);
+        
+        return { ...recipient, committed, spent };
       })
     );
     
-    return recipientsWithSpent.sort((a, b) => a.order - b.order);
+    return recipientsWithBudget.sort((a, b) => a.order - b.order);
   },
 });
 
@@ -28,15 +38,32 @@ export const getGlobalBudget = query({
     const recipients = await ctx.db.query("recipients").collect();
     const totalBudget = recipients.reduce((sum, r) => sum + r.budget, 0);
     
-    // Get all items to calculate total spent
+    // Get all items to calculate totals
     const items = await ctx.db.query("items").collect();
-    const totalSpent = items.reduce((sum, item) => sum + item.cost, 0);
+    
+    // Committed = planned items (not yet bought)
+    const totalCommitted = items
+      .filter((item) => item.status === "planned")
+      .reduce((sum, item) => sum + item.cost, 0);
+    
+    // Spent = bought, shipped, wrapped items (actually purchased)
+    const totalSpent = items
+      .filter((item) => ["bought", "shipped", "wrapped"].includes(item.status))
+      .reduce((sum, item) => sum + item.cost, 0);
+    
+    // Available = budget minus committed and spent
+    const available = totalBudget - totalCommitted - totalSpent;
+    
+    // Utilization = (committed + spent) / budget
+    const totalAllocated = totalCommitted + totalSpent;
+    const percentUtilized = totalBudget > 0 ? Math.round((totalAllocated / totalBudget) * 100) : 0;
     
     return {
       totalBudget,
+      totalCommitted,
       totalSpent,
-      remaining: totalBudget - totalSpent,
-      percentUtilized: totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0,
+      available,
+      percentUtilized,
     };
   },
 });
@@ -89,4 +116,3 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
   },
 });
-
