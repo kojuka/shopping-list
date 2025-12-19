@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Playfair Display", serif;
+  --font-sans: "DM Sans", sans-serif;
+  
+  --color-holly: #1a472a;
+  --color-holly-light: #2d5a3d;
+  --color-cranberry: #9b2335;
+  --color-cranberry-dark: #7a1c2a;
+  --color-gold: #d4a84b;
+  --color-gold-light: #e8c67a;
+  --color-snow: #f8f9fa;
+  --color-frost: #e9ecef;
+  --color-coal: #212529;
+  --color-silver: #6c757d;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: linear-gradient(135deg, var(--color-snow) 0%, var(--color-frost) 100%);
+  min-height: 100vh;
+}
