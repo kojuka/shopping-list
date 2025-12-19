@@ -1,12 +1,20 @@
 import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 
+// Allowed emails (set via ALLOWED_EMAILS env var)
+const getAllowedEmails = (): string[] => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const envValue = (globalThis as any).process?.env?.ALLOWED_EMAILS as string | undefined;
+  if (!envValue) return [];
+  return envValue.split(",").map((e: string) => e.trim().toLowerCase());
+};
+
 export const { auth, signIn, signOut, store } = convexAuth({
   providers: [Google],
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       // Check if email is in the allowed list
-      const allowedEmails = process.env.ALLOWED_EMAILS?.split(",").map(e => e.trim().toLowerCase()) ?? [];
+      const allowedEmails = getAllowedEmails();
       
       if (allowedEmails.length > 0) {
         const email = args.profile?.email?.toLowerCase();
