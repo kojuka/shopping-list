@@ -29,17 +29,19 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
   
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetValue, setBudgetValue] = useState(recipient.budget.toString());
+  const [newItemId, setNewItemId] = useState<Id<"items"> | null>(null);
 
   const available = recipient.budget - recipient.committed - recipient.spent;
 
   const handleAddItem = async () => {
-    await createItem({
+    const id = await createItem({
       recipientId: recipient._id,
-      name: "New Item",
+      name: "",
       cost: 0,
       status: "idea",
       notes: "",
     });
+    setNewItemId(id);
   };
 
   const handleBudgetSave = async () => {
@@ -151,8 +153,10 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
           <GiftCard
             key={item._id}
             item={item}
+            autoEditName={item._id === newItemId}
             onUpdate={(updates) => updateItem({ id: item._id, ...updates })}
             onDelete={() => deleteItem({ id: item._id })}
+            onEditingComplete={() => setNewItemId(null)}
           />
         ))}
       </div>
@@ -190,12 +194,14 @@ interface GiftCardProps {
     status: Status;
     notes: string;
   };
+  autoEditName?: boolean;
   onUpdate: (updates: Partial<{ name: string; cost: number; status: Status; notes: string }>) => void;
   onDelete: () => void;
+  onEditingComplete?: () => void;
 }
 
-function GiftCard({ item, onUpdate, onDelete }: GiftCardProps) {
-  const [editingName, setEditingName] = useState(false);
+function GiftCard({ item, autoEditName, onUpdate, onDelete, onEditingComplete }: GiftCardProps) {
+  const [editingName, setEditingName] = useState(autoEditName ?? false);
   const [editingCost, setEditingCost] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [nameValue, setNameValue] = useState(item.name);
@@ -216,14 +222,21 @@ function GiftCard({ item, onUpdate, onDelete }: GiftCardProps) {
             onChange={(e) => setNameValue(e.target.value)}
             className="flex-1 px-3 py-2 border border-frost rounded-xl text-base font-medium"
             autoFocus
+            placeholder="Gift name..."
             onBlur={() => {
-              onUpdate({ name: nameValue });
+              if (nameValue.trim()) {
+                onUpdate({ name: nameValue });
+              }
               setEditingName(false);
+              onEditingComplete?.();
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                onUpdate({ name: nameValue });
+                if (nameValue.trim()) {
+                  onUpdate({ name: nameValue });
+                }
                 setEditingName(false);
+                onEditingComplete?.();
               }
             }}
           />
