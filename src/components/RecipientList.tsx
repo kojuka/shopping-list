@@ -7,7 +7,9 @@ interface Recipient {
   _id: Id<"recipients">;
   name: string;
   budget: number;
+  committed: number;
   spent: number;
+  itemCount: number;
 }
 
 interface RecipientListProps {
@@ -78,8 +80,12 @@ export function RecipientList({ recipients, selectedId, onSelect }: RecipientLis
 
       <div className="space-y-2">
         {recipients.map((recipient) => {
-          const percentSpent = recipient.budget > 0 
-            ? Math.min(100, Math.round((recipient.spent / recipient.budget) * 100)) 
+          const allocated = recipient.committed + recipient.spent;
+          const percentAllocated = recipient.budget > 0 
+            ? Math.min(100, Math.round((allocated / recipient.budget) * 100)) 
+            : 0;
+          const spentPercent = recipient.budget > 0
+            ? Math.min(100, Math.round((recipient.spent / recipient.budget) * 100))
             : 0;
           
           return (
@@ -93,9 +99,20 @@ export function RecipientList({ recipients, selectedId, onSelect }: RecipientLis
               }`}
             >
               <div className="flex items-center justify-between">
-                <p className={`font-semibold text-base ${selectedId === recipient._id ? "text-white" : "text-coal"}`}>
-                  {recipient.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className={`font-semibold text-base ${selectedId === recipient._id ? "text-white" : "text-coal"}`}>
+                    {recipient.name}
+                  </p>
+                  {recipient.itemCount > 0 && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      selectedId === recipient._id 
+                        ? "bg-white/20 text-white" 
+                        : "bg-holly/10 text-holly"
+                    }`}>
+                      {recipient.itemCount} {recipient.itemCount === 1 ? "gift" : "gifts"}
+                    </span>
+                  )}
+                </div>
                 <svg 
                   className={`w-5 h-5 lg:hidden ${selectedId === recipient._id ? "text-white/60" : "text-silver"}`} 
                   fill="none" 
@@ -106,13 +123,17 @@ export function RecipientList({ recipients, selectedId, onSelect }: RecipientLis
                 </svg>
               </div>
               <p className={`text-sm mt-0.5 ${selectedId === recipient._id ? "text-white/80" : "text-silver"}`}>
-                ${recipient.spent.toFixed(0)} / ${recipient.budget.toFixed(0)}
+                ${allocated.toFixed(0)} / ${recipient.budget.toFixed(0)}
               </p>
-              {/* Mini progress bar */}
-              <div className={`mt-2 h-1 rounded-full overflow-hidden ${selectedId === recipient._id ? "bg-white/20" : "bg-gray-300"}`}>
+              {/* Mini progress bar with spent (green) and committed (amber) */}
+              <div className={`mt-2 h-1 rounded-full overflow-hidden flex ${selectedId === recipient._id ? "bg-white/20" : "bg-gray-300"}`}>
                 <div 
-                  className={`h-full rounded-full transition-all ${selectedId === recipient._id ? "bg-white/60" : "bg-holly"}`}
-                  style={{ width: `${percentSpent}%` }}
+                  className={`h-full transition-all ${selectedId === recipient._id ? "bg-white/80" : "bg-holly"}`}
+                  style={{ width: `${spentPercent}%` }}
+                />
+                <div 
+                  className={`h-full transition-all ${selectedId === recipient._id ? "bg-white/40" : "bg-amber-400"}`}
+                  style={{ width: `${percentAllocated - spentPercent}%` }}
                 />
               </div>
             </button>

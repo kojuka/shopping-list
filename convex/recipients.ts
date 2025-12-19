@@ -24,7 +24,12 @@ export const list = query({
           .filter((item) => ["bought", "shipped", "wrapped"].includes(item.status))
           .reduce((sum, item) => sum + item.cost, 0);
         
-        return { ...recipient, committed, spent };
+        // Count of items we're committed to buying (not ideas or delayed)
+        const itemCount = items.filter((item) => 
+          ["planned", "bought", "shipped", "wrapped"].includes(item.status)
+        ).length;
+        
+        return { ...recipient, committed, spent, itemCount };
       })
     );
     
