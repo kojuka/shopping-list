@@ -44,7 +44,7 @@ export function Header({ remaining }: HeaderProps) {
         <div className="flex items-center gap-3 sm:gap-6">
           <div className="text-right">
             <p className="text-[10px] sm:text-xs text-silver uppercase tracking-wide">Left</p>
-            <p className="text-base sm:text-xl font-bold text-holly">${remaining.toFixed(0)}</p>
+            <p className="text-base sm:text-xl font-bold text-holly">${remaining.toLocaleString()}</p>
           </div>
           
           {/* User Menu */}

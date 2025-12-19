@@ -109,7 +109,7 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
                 }}
                 className="min-h-[44px] px-4 border border-frost rounded-xl hover:bg-frost active:bg-frost transition-colors text-base"
               >
-                ${recipient.budget.toFixed(0)}
+                ${recipient.budget.toLocaleString()}
               </button>
             )}
           </div>
@@ -124,16 +124,16 @@ export function GiftList({ recipient, onBack }: GiftListProps) {
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
               {recipient.committed > 0 && (
                 <span className="text-amber-600">
-                  ${recipient.committed.toFixed(0)} planned
+                  ${recipient.committed.toLocaleString()} planned
                 </span>
               )}
               {recipient.spent > 0 && (
                 <span className="text-holly">
-                  ${recipient.spent.toFixed(0)} spent
+                  ${recipient.spent.toLocaleString()} spent
                 </span>
               )}
               <span className={available >= 0 ? "text-silver" : "text-cranberry font-semibold"}>
-                ${available.toFixed(0)} left
+                ${available.toLocaleString()} left
               </span>
             </div>
           </div>

@@ -123,7 +123,7 @@ export function RecipientList({ recipients, selectedId, onSelect }: RecipientLis
                 </svg>
               </div>
               <p className={`text-sm mt-0.5 ${selectedId === recipient._id ? "text-white/80" : "text-silver"}`}>
-                ${allocated.toFixed(0)} / ${recipient.budget.toFixed(0)}
+                ${allocated.toLocaleString()} / ${recipient.budget.toLocaleString()}
               </p>
               {/* Mini progress bar with spent (green) and committed (amber) */}
               <div className={`mt-2 h-1 rounded-full overflow-hidden flex ${selectedId === recipient._id ? "bg-white/20" : "bg-gray-300"}`}>

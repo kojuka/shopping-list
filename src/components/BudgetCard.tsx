@@ -25,7 +25,7 @@ export function BudgetCard({ totalBudget, totalCommitted, totalSpent, available,
           </div>
           <div className="text-right">
             <span className={`text-sm sm:text-base font-semibold ${available >= 0 ? 'text-holly' : 'text-cranberry'}`}>
-              ${available.toFixed(0)} Available
+              ${available.toLocaleString()} Available
             </span>
           </div>
         </div>
@@ -51,12 +51,12 @@ export function BudgetCard({ totalBudget, totalCommitted, totalSpent, available,
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-holly" />
             <span className="text-silver">Spent:</span>
-            <span className="font-semibold text-coal">${totalSpent.toFixed(0)}</span>
+            <span className="font-semibold text-coal">${totalSpent.toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-400" />
             <span className="text-silver">Committed:</span>
-            <span className="font-semibold text-coal">${totalCommitted.toFixed(0)}</span>
+            <span className="font-semibold text-coal">${totalCommitted.toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-silver">{percentUtilized}% allocated</span>
