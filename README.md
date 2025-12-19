@@ -1,73 +1,119 @@
-# React + TypeScript + Vite
+# 🎁 Shopping List
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A collaborative gift shopping list app for tracking holiday purchases, budgets, and gift ideas. Built for families to plan and manage gift-giving together in real-time.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Google Sign-In** - Secure authentication with email allowlist
+- **Real-time Sync** - Changes sync instantly across all devices
+- **Gift Workflow** - Track gifts through stages: Idea → Planned → Bought → Shipped → Wrapped
+- **Budget Tracking** - See committed vs. spent amounts with visual progress bars
+- **Per-Recipient Lists** - Organize gifts by recipient with individual budgets
+- **Mobile-Friendly** - Responsive design that works great on phones
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS
+- **Backend**: [Convex](https://convex.dev) (real-time database & serverless functions)
+- **Auth**: Convex Auth with Google OAuth
+- **Hosting**: Vercel (frontend) + Convex Cloud (backend)
 
-## Expanding the ESLint configuration
+## Gift Status Workflow
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Status | Budget Impact | Description |
+|--------|---------------|-------------|
+| 💭 Idea | None | Brainstorming, not committed |
+| 📋 Planned | Committed | Decided to buy, counts toward budget |
+| 💰 Bought | Spent | Actually purchased |
+| 📦 Shipped | Spent | In transit |
+| 🎁 Wrapped | Spent | Ready to give |
+| ⏳ Delayed | - | Backordered or issues |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+
+- A [Convex](https://convex.dev) account
+- Google OAuth credentials (from [Google Cloud Console](https://console.cloud.google.com/apis/credentials))
+
+### Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Start Convex dev server**
+   ```bash
+   npx convex dev
+   ```
+
+3. **Start Vite dev server** (in another terminal)
+   ```bash
+   npm run dev
+   ```
+
+4. **Set up environment variables** in Convex:
+   ```bash
+   npx convex env set AUTH_GOOGLE_ID "your-google-client-id"
+   npx convex env set AUTH_GOOGLE_SECRET "your-google-client-secret"
+   npx convex env set SITE_URL "http://localhost:5173"
+   npx convex env set JWT_PRIVATE_KEY "your-rsa-private-key"
+   npx convex env set JWKS '{"keys":[...]}'
+   npx convex env set ALLOWED_EMAILS "email1@gmail.com,email2@gmail.com"
+   ```
+
+### Deployment
+
+1. **Deploy Convex backend**
+   ```bash
+   npx convex deploy
+   ```
+
+2. **Set production environment variables**
+   ```bash
+   npx convex env set --prod AUTH_GOOGLE_ID "..."
+   npx convex env set --prod AUTH_GOOGLE_SECRET "..."
+   npx convex env set --prod SITE_URL "https://your-app.vercel.app"
+   npx convex env set --prod JWT_PRIVATE_KEY "..."
+   npx convex env set --prod JWKS "..."
+   npx convex env set --prod ALLOWED_EMAILS "..."
+   ```
+
+3. **Deploy to Vercel**
+   ```bash
+   vercel --prod
+   ```
+
+4. **Add production redirect URI** to Google OAuth:
+   ```
+   https://your-convex-deployment.convex.site/api/auth/callback/google
+   ```
+
+## Project Structure
+
+```
+├── convex/           # Convex backend
+│   ├── auth.ts       # Authentication config
+│   ├── items.ts      # Gift items queries/mutations
+│   ├── recipients.ts # Recipients queries/mutations
+│   ├── schema.ts     # Database schema
+│   └── users.ts      # User queries
+├── src/
+│   ├── components/   # React components
+│   │   ├── BudgetCard.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── GiftList.tsx
+│   │   ├── Header.tsx
+│   │   ├── RecipientList.tsx
+│   │   ├── SignIn.tsx
+│   │   └── StatusDropdown.tsx
+│   ├── App.tsx
+│   └── main.tsx
+└── package.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## License
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Private - for personal use only.
